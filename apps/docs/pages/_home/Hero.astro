@@ -9,7 +9,7 @@ const hosts = [
     id: "pi",
     label: "Pi",
     icon: "/logos/pi-color.svg",
-    command: "pi install npm:pi-lossless",
+    command: "pi install git:github.com/RogerNavelsaker/pi-lossless",
     start: "/guides/pi/getting-started",
   },
   {
@@ -87,7 +87,7 @@ const idleChip = "border-border font-medium text-muted-foreground hover:text-for
       </div>
 
       <div aria-live="polite">
-        <CopyCommand command="pi install npm:pi-lossless" hostCommand />
+        <CopyCommand command="pi install git:github.com/RogerNavelsaker/pi-lossless" hostCommand />
       </div>
     </div>
 

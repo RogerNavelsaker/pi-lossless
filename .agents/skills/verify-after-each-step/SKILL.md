@@ -23,8 +23,8 @@ doc change, config change.
    and dozens of failures that are runner artifacts rather than defects.
 3. **`packages/*/src/**` or `packages/*/test/**` changed**: `bun run typecheck` (`tsc --noEmit`),
    the same check CI runs, as a second opinion on tsgo.
-4. **`package.json` / packaging changed**: `bun run pack` and, before any
-   publish, `npm publish --dry-run` to inspect the tarball.
+4. **`package.json` / packaging changed**: `bun run pack`. For GitHub releases,
+   verify `packages/pi/dist/index.mjs` is built and attached; npm is not a deliverable.
 5. **Coverage-relevant**: `bun run test:coverage` (portable, CI gate), then
    `bun run coverage:codemap` (local codemap ingest) and check
    `codemap dead-code` stays empty.

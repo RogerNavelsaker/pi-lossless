@@ -1,6 +1,7 @@
 {
   "name": "opencode-lossless",
   "version": "0.1.3",
+  "private": true,
   "description": "Lossless Context Management for OpenCode v2: long sessions keep working past the point where the model would forget, and every verbatim message stays searchable and readable.",
   "keywords": [
     "coding-agent",
@@ -10,15 +11,15 @@
     "opencode",
     "tanstack-intent"
   ],
-  "homepage": "https://github.com/stainless-code/lossless#readme",
+  "homepage": "https://github.com/RogerNavelsaker/pi-lossless#readme",
   "bugs": {
-    "url": "https://github.com/stainless-code/lossless/issues"
+    "url": "https://github.com/RogerNavelsaker/pi-lossless/issues"
   },
   "license": "MIT",
   "author": "stainless-code",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/stainless-code/lossless.git",
+    "url": "git+https://github.com/RogerNavelsaker/pi-lossless.git",
     "directory": "packages/opencode"
   },
   "files": [
@@ -36,8 +37,7 @@
   },
   "scripts": {
     "pack:watch": "vp pack --watch",
-    "prepack": "vp pack",
-    "prepublishOnly": "vp check && vp test && intent validate"
+    "prepack": "vp pack"
   },
   "devDependencies": {
     "@opencode/ai": "2.1.4",
@@ -45,6 +45,6 @@
     "lossless-core": "workspace:*"
   },
   "engines": {
-    "node": ">=22.19.0"
+    "bun": ">=1.3.13"
   }
 }

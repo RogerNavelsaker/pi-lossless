@@ -1,8 +1,8 @@
+import { Database } from "bun:sqlite";
 import assert from "node:assert/strict";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { DatabaseSync } from "node:sqlite";
 
 import { test } from "vite-plus/test";
 
@@ -24,7 +24,7 @@ test("store: a file predating the model state table grows it without losing a ro
     { entryId: "e0", role: "user", text: "kept across the upgrade", timestamp: 1 },
   ]);
   first.close();
-  const raw = new DatabaseSync(dbPath);
+  const raw = new Database(dbPath);
   raw.exec("DROP TABLE model_state");
   raw.exec("PRAGMA user_version = 0");
   raw.close();
@@ -55,8 +55,8 @@ test("store: a file predating the model state table grows it without losing a ro
   });
   upgraded.close();
 
-  const version = new DatabaseSync(dbPath);
-  const row = version.prepare("PRAGMA user_version").get() as { user_version: number };
+  const version = new Database(dbPath);
+  const row = version.query("PRAGMA user_version").get() as { user_version: number };
   assert.equal(row.user_version, SCHEMA_VERSION);
   version.close();
 });
@@ -267,7 +267,7 @@ test("migration: a store written before the payload column upgrades in place", (
     { entryId: "e0", role: "user", text: "kept across the upgrade", timestamp: 1 },
   ]);
   first.close();
-  const raw = new DatabaseSync(dbPath);
+  const raw = new Database(dbPath);
   raw.exec("ALTER TABLE messages DROP COLUMN payload");
   raw.exec("PRAGMA user_version = 0");
   raw.close();
@@ -289,8 +289,8 @@ test("migration: a store written before the payload column upgrades in place", (
   assert.equal(upgraded.stats().payloadMessages, 1);
   upgraded.close();
 
-  const version = new DatabaseSync(dbPath);
-  const row = version.prepare("PRAGMA user_version").get() as { user_version: number };
+  const version = new Database(dbPath);
+  const row = version.query("PRAGMA user_version").get() as { user_version: number };
   assert.equal(row.user_version, SCHEMA_VERSION);
   version.close();
 });
@@ -312,7 +312,7 @@ test("store: a stated window round-trips and a file missing the columns grows th
   assert.equal(first.getModelState("test/model")?.samples, 3);
   first.close();
 
-  const raw = new DatabaseSync(dbPath);
+  const raw = new Database(dbPath);
   raw.exec("ALTER TABLE model_state DROP COLUMN context_window");
   raw.exec("ALTER TABLE model_state DROP COLUMN window_source");
   raw.exec("PRAGMA user_version = 0");

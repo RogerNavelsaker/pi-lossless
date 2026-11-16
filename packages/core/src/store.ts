@@ -1,3 +1,4 @@
+import { Database, type Statement } from "bun:sqlite";
 import {
   chmodSync,
   closeSync,
@@ -9,7 +10,6 @@ import {
   statSync,
 } from "node:fs";
 import { dirname, join, resolve } from "node:path";
-import { DatabaseSync, type StatementSync } from "node:sqlite";
 
 import { estimateTokens } from "./estimate-tokens.ts";
 import { isFileKind, type FileDescriptor } from "./files.ts";
@@ -398,7 +398,7 @@ END;
 /** One migration step per schema generation. Each step inspects the schema
  * before it writes, so running the set on an already-migrated store is a no-op
  * and a store written before any version was recorded still upgrades. */
-function migrate(db: DatabaseSync): void {
+function migrate(db: Database): void {
   const startedVersion = readVersion(db);
   addColumnIfMissing(db, "messages", "payload", "payload TEXT");
   addColumnIfMissing(db, "messages", "removed_at", "removed_at INTEGER");
@@ -431,8 +431,8 @@ function migrate(db: DatabaseSync): void {
 /** A predated store has no verdicts. The mechanical prefix is the only direct
  * evidence a row carries, and a clean ancestor of a non-clean row is derived
  * even when its own prose looks clean. */
-function backfillSummaryQuality(db: DatabaseSync): void {
-  db.prepare("UPDATE summaries SET quality = 'mechanical' WHERE substr(text, 1, ?) = ?").run(
+function backfillSummaryQuality(db: Database): void {
+  db.query("UPDATE summaries SET quality = 'mechanical' WHERE substr(text, 1, ?) = ?").run(
     TRUNCATED_SUMMARY_PREFIX.length,
     TRUNCATED_SUMMARY_PREFIX,
   );
@@ -447,24 +447,24 @@ function backfillSummaryQuality(db: DatabaseSync): void {
 }
 
 /** The recorded schema generation, or 0 for a store written before one was. */
-function readVersion(db: DatabaseSync): number {
-  return Number((db.prepare("PRAGMA user_version").get() as { user_version: number }).user_version);
+function readVersion(db: Database): number {
+  return Number((db.query("PRAGMA user_version").get() as { user_version: number }).user_version);
 }
 
-function tableColumns(db: DatabaseSync, table: string): Set<string> {
-  const rows = db.prepare("SELECT name FROM pragma_table_info(?)").all(table) as Array<{
+function tableColumns(db: Database, table: string): Set<string> {
+  const rows = db.query("SELECT name FROM pragma_table_info(?)").all(table) as Array<{
     name: string;
   }>;
   return new Set(rows.map((r) => r.name));
 }
 
-function addColumnIfMissing(db: DatabaseSync, table: string, column: string, ddl: string): boolean {
+function addColumnIfMissing(db: Database, table: string, column: string, ddl: string): boolean {
   if (tableColumns(db, table).has(column)) return false;
   db.exec(`ALTER TABLE ${table} ADD COLUMN ${ddl}`);
   return true;
 }
 
-function createSpanIndex(db: DatabaseSync): void {
+function createSpanIndex(db: Database): void {
   db.exec(CREATE_SPAN_INDEX);
 }
 
@@ -475,7 +475,7 @@ function createSpanIndex(db: DatabaseSync): void {
 const CREATE_ROLE_TIME_INDEX =
   "CREATE INDEX IF NOT EXISTS idx_messages_role_timestamp ON messages(role, timestamp)";
 
-function createRoleTimeIndex(db: DatabaseSync): void {
+function createRoleTimeIndex(db: Database): void {
   db.exec(CREATE_ROLE_TIME_INDEX);
 }
 
@@ -515,7 +515,7 @@ export interface ModelState {
 export const WINDOW_SOURCE_PROVIDER = "provider-error";
 
 export class LcmStore {
-  private db: DatabaseSync;
+  private db: Database;
   private dbPath: string;
   /** Opened for reading a past session's store: no migration ran, so `generation`
    * is the file's own and a caller may have to skip it. */
@@ -533,71 +533,71 @@ export class LcmStore {
   private liveTokens = new Set<string>();
   private reapedInRun = new Map<string, number>();
   private stmts: {
-    hasEntry: StatementSync;
-    insertMessage: StatementSync;
-    insertedId: StatementSync;
-    insertSummary: StatementSync;
-    insertProvenance: StatementSync;
-    insertFile: StatementSync;
-    linkMessageFile: StatementSync;
-    linkSummaryFile: StatementSync;
-    allFiles: StatementSync;
-    countFiles: StatementSync;
-    sumFileBytes: StatementSync;
-    summaryShapes: StatementSync;
-    summarySpans: StatementSync;
-    duplicateSpans: StatementSync;
-    uncoveredMessages: StatementSync;
-    grep: StatementSync;
-    grepCount: StatementSync;
-    messagesInSpan: StatementSync;
-    messagePage: StatementSync;
-    uncoveredInSpan: StatementSync;
-    spanBounds: StatementSync;
-    frontier: StatementSync;
-    allMessages: StatementSync;
-    allSummaries: StatementSync;
-    getSummary: StatementSync;
-    summarySpanId: StatementSync;
-    updateSummaryText: StatementSync;
-    deleteSummary: StatementSync;
-    setSummaryThorough: StatementSync;
-    coveredMessageIds: StatementSync;
-    coveringLeafOf: StatementSync;
-    coveringSummaryByEntry: StatementSync;
-    messageByEntry: StatementSync;
-    countRemoved: StatementSync;
-    parentSummaryIds: StatementSync;
-    childSummaryIds: StatementSync;
-    taintedSummaries: StatementSync;
-    summarySourceMessages: StatementSync;
-    summarySourceChildren: StatementSync;
-    casUpdateSummaryText: StatementSync;
-    markSummaryDerived: StatementSync;
-    countMessages: StatementSync;
-    countEntryPrefix: StatementSync;
-    countSummaries: StatementSync;
-    pageBytes: StatementSync;
-    entrySpan: StatementSync;
-    coveredSize: StatementSync;
-    payloadMessages: StatementSync;
-    payloadBytes: StatementSync;
-    commitRun: StatementSync;
-    abandonRun: StatementSync;
-    dropUnresolvable: StatementSync;
-    insertRun: StatementSync;
-    deleteRun: StatementSync;
-    runOwner: StatementSync;
-    openRuns: StatementSync;
-    getModelState: StatementSync;
-    setModelState: StatementSync;
-    setModelWindow: StatementSync;
-    deletePendingForRun: StatementSync;
-    deleteUntrackedPending: StatementSync;
-    orphanChildParents: StatementSync;
-    pendingIdsForRun: StatementSync;
-    untrackedPendingIds: StatementSync;
-    dropOrphanChildren: StatementSync;
+    hasEntry: Statement;
+    insertMessage: Statement;
+    insertedId: Statement;
+    insertSummary: Statement;
+    insertProvenance: Statement;
+    insertFile: Statement;
+    linkMessageFile: Statement;
+    linkSummaryFile: Statement;
+    allFiles: Statement;
+    countFiles: Statement;
+    sumFileBytes: Statement;
+    summaryShapes: Statement;
+    summarySpans: Statement;
+    duplicateSpans: Statement;
+    uncoveredMessages: Statement;
+    grep: Statement;
+    grepCount: Statement;
+    messagesInSpan: Statement;
+    messagePage: Statement;
+    uncoveredInSpan: Statement;
+    spanBounds: Statement;
+    frontier: Statement;
+    allMessages: Statement;
+    allSummaries: Statement;
+    getSummary: Statement;
+    summarySpanId: Statement;
+    updateSummaryText: Statement;
+    deleteSummary: Statement;
+    setSummaryThorough: Statement;
+    coveredMessageIds: Statement;
+    coveringLeafOf: Statement;
+    coveringSummaryByEntry: Statement;
+    messageByEntry: Statement;
+    countRemoved: Statement;
+    parentSummaryIds: Statement;
+    childSummaryIds: Statement;
+    taintedSummaries: Statement;
+    summarySourceMessages: Statement;
+    summarySourceChildren: Statement;
+    casUpdateSummaryText: Statement;
+    markSummaryDerived: Statement;
+    countMessages: Statement;
+    countEntryPrefix: Statement;
+    countSummaries: Statement;
+    pageBytes: Statement;
+    entrySpan: Statement;
+    coveredSize: Statement;
+    payloadMessages: Statement;
+    payloadBytes: Statement;
+    commitRun: Statement;
+    abandonRun: Statement;
+    dropUnresolvable: Statement;
+    insertRun: Statement;
+    deleteRun: Statement;
+    runOwner: Statement;
+    openRuns: Statement;
+    getModelState: Statement;
+    setModelState: Statement;
+    setModelWindow: Statement;
+    deletePendingForRun: Statement;
+    deleteUntrackedPending: Statement;
+    orphanChildParents: Statement;
+    pendingIdsForRun: Statement;
+    untrackedPendingIds: Statement;
+    dropOrphanChildren: Statement;
   };
 
   constructor(dbPath: string, opts?: { readOnly?: boolean; queryOnly?: boolean }) {
@@ -615,7 +615,8 @@ export class LcmStore {
       chmodSync(dbPath, 0o600);
     }
     this.dbPath = dbPath;
-    this.db = new DatabaseSync(dbPath, opts?.readOnly === true ? { readOnly: true } : {});
+    this.db =
+      opts?.readOnly === true ? new Database(dbPath, { readonly: true }) : new Database(dbPath);
     if (opts?.queryOnly === true) this.db.exec("PRAGMA query_only = ON;");
     if (this.readOnly && readVersion(this.db) < SCHEMA_VERSION) {
       const generation = readVersion(this.db);
@@ -640,7 +641,7 @@ export class LcmStore {
       } catch {}
     }
     this.generation = readVersion(this.db);
-    const prep = (sql: string): StatementSync => this.db.prepare(sql);
+    const prep = (sql: string): Statement => this.db.query(sql);
     this.stmts = {
       hasEntry: prep("SELECT 1 FROM messages WHERE entry_id = ? LIMIT 1"),
       getModelState: prep(
@@ -1025,7 +1026,8 @@ export class LcmStore {
   }
 
   hasEntry(entryId: string): boolean {
-    return this.stmts.hasEntry.get(entryId) !== undefined;
+    const row = this.stmts.hasEntry.get(entryId);
+    return row !== null && row !== undefined;
   }
 
   insertMessage(m: {
@@ -1050,7 +1052,7 @@ export class LcmStore {
 
   /** One write transaction around a group of statements, so a compaction is
    * atomic: the node row, its provenance rows and its file links either all
-   * land or none do. `node:sqlite` ships no transaction helper, so the
+   * land or none do. `bun:sqlite` ships no transaction helper, so the
    * statements are explicit. A reentrant call joins the open transaction: the
    * caller that opened it owns the commit, so an inner throw rolls the whole
    * group back rather than leaving a half-applied write. */
@@ -1149,7 +1151,7 @@ export class LcmStore {
   filesForMessages(ids: readonly number[]): Array<FileDescriptor & { messageId: number }> {
     if (ids.length === 0) return [];
     const rows = this.db
-      .prepare(
+      .query(
         `SELECT f.file_id, f.path, f.bytes, f.sha256, f.kind, f.preview, mf.message_id AS message_id
            FROM message_files mf JOIN files f ON f.file_id = mf.file_id
           WHERE mf.message_id IN (${ids.map(() => "?").join(",")}) ORDER BY mf.message_id ASC`,
@@ -1161,7 +1163,7 @@ export class LcmStore {
   fileIdsForMessages(ids: readonly number[]): string[] {
     if (ids.length === 0) return [];
     const rows = this.db
-      .prepare(
+      .query(
         `SELECT DISTINCT file_id FROM message_files WHERE message_id IN (${ids.map(() => "?").join(",")})`,
       )
       .all(...ids) as Array<{ file_id: string }>;
@@ -1171,7 +1173,7 @@ export class LcmStore {
   fileIdsForSummaries(ids: readonly number[]): string[] {
     if (ids.length === 0) return [];
     const rows = this.db
-      .prepare(
+      .query(
         `SELECT DISTINCT file_id FROM summary_files WHERE summary_id IN (${ids.map(() => "?").join(",")}) ORDER BY file_id ASC`,
       )
       .all(...ids) as Array<{ file_id: string }>;
@@ -1181,7 +1183,7 @@ export class LcmStore {
   filesForSummaries(ids: readonly number[]): FileDescriptor[] {
     if (ids.length === 0) return [];
     const rows = this.db
-      .prepare(
+      .query(
         `SELECT DISTINCT f.file_id, f.path, f.bytes, f.sha256, f.kind, f.preview
            FROM summary_files sf JOIN files f ON f.file_id = sf.file_id
           WHERE sf.summary_id IN (${ids.map(() => "?").join(",")}) ORDER BY f.path ASC`,
@@ -1283,7 +1285,7 @@ export class LcmStore {
       opts?.dateEnd,
       scope ? Math.max(want, scope.size + want) : want,
     );
-    const rows = this.db.prepare(sql).all(...args) as Array<{
+    const rows = this.db.query(sql).all(...args) as Array<{
       id: number;
       entry_id: string;
       role: string;
@@ -1342,7 +1344,7 @@ export class LcmStore {
         opts?.dateStart,
         opts?.dateEnd,
       );
-      const row = this.db.prepare(sql).get(...args) as { c: number } | undefined;
+      const row = this.db.query(sql).get(...args) as { c: number } | undefined;
       if (!row) return undefined;
       return Number(row.c);
     } catch {
@@ -1372,7 +1374,7 @@ export class LcmStore {
       opts?.dateEnd,
       want,
     );
-    const rows = this.db.prepare(sql).all(...args) as Array<{
+    const rows = this.db.query(sql).all(...args) as Array<{
       id: number;
       entry_id: string;
       role: string;
@@ -1395,8 +1397,11 @@ export class LcmStore {
   }
 
   coveringSummaryId(entryId: string): number | undefined {
-    const row = this.stmts.coveringSummaryByEntry.get(entryId, null) as { id: number } | undefined;
-    return row === undefined ? undefined : Number(row.id);
+    const row = this.stmts.coveringSummaryByEntry.get(entryId, null) as
+      | { id: number }
+      | undefined
+      | null;
+    return row === null || row === undefined ? undefined : Number(row.id);
   }
 
   messageByEntryId(entryId: string): StoredMessage | undefined {
@@ -1457,7 +1462,7 @@ export class LcmStore {
   }
 
   getSummary(id: number, run?: string): SummaryNode | undefined {
-    const row = this.stmts.getSummary.get(id, run ?? null);
+    const row = this.stmts.getSummary.get(id, run ?? null) as Record<string, unknown> | null;
     return row ? rToSummary(row) : undefined;
   }
 
@@ -1533,7 +1538,7 @@ export class LcmStore {
       untrackedPending: (this.stmts.untrackedPendingIds.all() as Array<{ id: number }>).map((r) =>
         num(r.id),
       ),
-      foreignKeyViolations: this.db.prepare("PRAGMA foreign_key_check").all().length,
+      foreignKeyViolations: this.db.query("PRAGMA foreign_key_check").all().length,
       schemaVersion: readVersion(this.db),
       uncoveredMessages: num((this.stmts.uncoveredMessages.get(null) as { c: number }).c),
       orphanSidecars: findOrphanSidecars(
@@ -1555,7 +1560,7 @@ export class LcmStore {
 
   deleteOrphanSpans(): number {
     const result = this.db
-      .prepare(
+      .query(
         `DELETE FROM summaries WHERE status = 'committed' AND (
            (SELECT COUNT(*) FROM messages WHERE entry_id = summaries.first_entry_id) = 0
         OR (SELECT COUNT(*) FROM messages WHERE entry_id = summaries.last_entry_id) = 0)`,
@@ -1581,7 +1586,7 @@ export class LcmStore {
    * one that cannot be expanded, and the newest wins between equals. */
   dedupeSpans(): number {
     const result = this.db
-      .prepare(
+      .query(
         `DELETE FROM summaries WHERE id NOT IN (
            SELECT id FROM (
              SELECT s.id,
@@ -1607,7 +1612,7 @@ export class LcmStore {
       removedAt === null
         ? `UPDATE messages SET removed_at = NULL WHERE removed_at IS NOT NULL AND entry_id IN (${placeholders})`
         : `UPDATE messages SET removed_at = ? WHERE removed_at IS NULL AND entry_id IN (${placeholders})`;
-    const stmt = this.db.prepare(sql);
+    const stmt = this.db.query(sql);
     const result = removedAt === null ? stmt.run(...entryIds) : stmt.run(removedAt, ...entryIds);
     return Number(result.changes);
   }
@@ -1620,15 +1625,15 @@ export class LcmStore {
     if (ids.length === 0) return [];
     const placeholders = ids.map(() => "?").join(",");
     const rows = this.db
-      .prepare(
+      .query(
         `SELECT id, entry_id, role, text, tokens, timestamp, payload, removed_at FROM messages WHERE id IN (${placeholders}) ORDER BY rowid ASC`,
       )
-      .all(...ids);
+      .all(...ids) as Array<Record<string, unknown>>;
     return rows.map(rToMessage);
   }
 
   allMessages(): StoredMessage[] {
-    const rows = this.stmts.allMessages.all();
+    const rows = this.stmts.allMessages.all() as Array<Record<string, unknown>>;
     return rows.map(rToMessage);
   }
 
@@ -1645,7 +1650,7 @@ export class LcmStore {
   }
 
   allSummaries(): SummaryNode[] {
-    const rows = this.stmts.allSummaries.all(null);
+    const rows = this.stmts.allSummaries.all(null) as Array<Record<string, unknown>>;
     return rows.map(rToSummary);
   }
 

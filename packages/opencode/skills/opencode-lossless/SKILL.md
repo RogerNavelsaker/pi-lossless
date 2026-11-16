@@ -9,7 +9,7 @@ metadata:
 requires:
   - lossless
 sources:
-  - stainless-code/lossless:packages/opencode/src
+  - RogerNavelsaker/pi-lossless:packages/opencode/src
 ---
 
 # opencode-lossless

@@ -2,6 +2,7 @@ import { defineConfig } from "vite-plus";
 
 export default defineConfig({
   pack: {
+    inputOptions: { external: ["bun:sqlite"] },
     deps: {
       resolveDepSubpath: true,
     },

@@ -1,6 +1,6 @@
-import { readFileSync, realpathSync } from "node:fs";
-import { findPackageJSON } from "node:module";
+import { existsSync, readFileSync, realpathSync } from "node:fs";
 import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import type { CommitState, ResolvedThresholds } from "./commit-policy.ts";
 import { fmtTokens } from "./format.ts";
@@ -282,13 +282,29 @@ export function hostVersion(hostPackage: string, from: string | URL): string {
   }
   return "unknown (not resolved)";
 }
+function findPackageManifest(packageName: string, from: string | URL): string | undefined {
+  const path =
+    from instanceof URL
+      ? fileURLToPath(from)
+      : from.startsWith("file:")
+        ? fileURLToPath(from)
+        : from;
+  let dir = dirname(path);
+  for (;;) {
+    const manifest = join(dir, "node_modules", ...packageName.split("/"), "package.json");
+    if (existsSync(manifest)) return manifest;
+    const parent = dirname(dir);
+    if (parent === dir) return undefined;
+    dir = parent;
+  }
+}
 
 /** The host manifest from the caller's module, then the realpath'd process
  * entry, so a symlinked global `bin` still lands inside the package. */
 function hostAnchors(hostPackage: string, from: string | URL): string[] {
   const anchors: string[] = [];
   try {
-    const manifest = findPackageJSON(hostPackage, from);
+    const manifest = findPackageManifest(hostPackage, from);
     if (manifest !== undefined) anchors.push(manifest);
   } catch {}
   const argv = process.argv[1];

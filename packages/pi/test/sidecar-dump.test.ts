@@ -1,3 +1,4 @@
+import { Database } from "bun:sqlite";
 import assert from "node:assert/strict";
 import {
   chmodSync,
@@ -11,7 +12,6 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { DatabaseSync } from "node:sqlite";
 
 import { ingestEntries, LcmStore, redactSecrets } from "lossless-core";
 import { test } from "vite-plus/test";
@@ -94,7 +94,7 @@ test("dump: old generation reports a named skip", () => {
   try {
     const path = join(dir, "old.sqlite");
     seedStore(path);
-    const raw = new DatabaseSync(path);
+    const raw = new Database(path);
     try {
       raw.exec("PRAGMA user_version = 1");
     } finally {

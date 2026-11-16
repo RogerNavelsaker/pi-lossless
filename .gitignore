@@ -3,6 +3,9 @@ node_modules/
 
 # build output
 dist/
+!packages/pi/dist/
+packages/pi/dist/*
+!packages/pi/dist/index.mjs
 *.tsbuildinfo
 *.tgz
 

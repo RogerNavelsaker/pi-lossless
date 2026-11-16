@@ -1,7 +1,7 @@
+import { Database } from "bun:sqlite";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { DatabaseSync } from "node:sqlite";
 
 import {
   LcmStore,
@@ -37,9 +37,9 @@ function compactionEvent(sessionID: string, messages: unknown[]): SessionCompact
 }
 
 function messageTexts(dbPath: string): string[] {
-  const db = new DatabaseSync(dbPath);
+  const db = new Database(dbPath);
   try {
-    const rows = db.prepare("SELECT text FROM messages ORDER BY rowid").all() as Array<{
+    const rows = db.query("SELECT text FROM messages ORDER BY rowid").all() as Array<{
       text: string;
     }>;
     return rows.map((row) => row.text);
@@ -266,11 +266,11 @@ describe("setupOpencodeLossless", () => {
     await tick();
     await secondCleanup();
 
-    const db = new DatabaseSync(sidecar);
+    const db = new Database(sidecar);
     let ids: string[];
     try {
       const rows = db
-        .prepare(
+        .query(
           "SELECT entry_id FROM messages WHERE entry_id LIKE '%:compaction:%' OR entry_id LIKE '%:summary:%' ORDER BY rowid",
         )
         .all() as Array<{ entry_id: string }>;

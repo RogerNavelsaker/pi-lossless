@@ -8,6 +8,7 @@ const engine = fileURLToPath(new URL("../core/src/index.ts", import.meta.url));
 
 export default defineConfig({
   pack: {
+    inputOptions: { external: ["bun:sqlite"] },
     deps: {
       resolveDepSubpath: true,
     },

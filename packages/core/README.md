@@ -1,7 +1,7 @@
 # lossless-core
 
-The engine behind [pi-lossless](https://npmx.dev/package/pi-lossless) and
-[opencode-lossless](https://npmx.dev/package/opencode-lossless): Lossless
+The engine behind [pi-lossless](https://github.com/RogerNavelsaker/pi-lossless/tree/main/packages/pi) and
+[opencode-lossless](https://github.com/RogerNavelsaker/pi-lossless/tree/main/packages/opencode): Lossless
 Context Management for a long-running agent. It stores every message verbatim,
 replaces aged context with searchable pointers, and keeps the original text
 readable by id, entry, or search. The algorithm is
@@ -49,9 +49,9 @@ model's reply.
 
 ## Where the rest lives
 
-- [pi-lossless](https://npmx.dev/package/pi-lossless): the Pi adapter, and
+- [pi-lossless](https://github.com/RogerNavelsaker/pi-lossless/tree/main/packages/pi): the Pi adapter, and
   every user-facing command.
-- [opencode-lossless](https://npmx.dev/package/opencode-lossless): the
+- [opencode-lossless](https://github.com/RogerNavelsaker/pi-lossless/tree/main/packages/opencode): the
   OpenCode v2 adapter, its commands, and the live loop.
 - [The docs site](https://stainless-code.com/lossless/): how LCM behaves in a
   session, the config keys, and the limits.

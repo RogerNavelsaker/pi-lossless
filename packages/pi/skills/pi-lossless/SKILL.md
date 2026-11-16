@@ -8,7 +8,7 @@ metadata:
   library_version: "0.1.3"
 requires: []
 sources:
-  - stainless-code/lossless:packages/pi/src
+  - RogerNavelsaker/pi-lossless:packages/pi/src
 ---
 
 # pi-lossless
@@ -21,7 +21,7 @@ derived index that can be deleted and rebuilt.
 ## Install
 
 ```bash
-pi install npm:pi-lossless
+pi install git:github.com/RogerNavelsaker/pi-lossless
 ```
 
 Passive logging starts immediately with zero config; swaps begin past the

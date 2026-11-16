@@ -1,3 +1,4 @@
+import { Database } from "bun:sqlite";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import {
@@ -11,7 +12,6 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, join, resolve } from "node:path";
-import { DatabaseSync } from "node:sqlite";
 
 import { LcmStore, ingestEntries } from "lossless-core";
 import { openSessionStore } from "lossless-core";
@@ -180,7 +180,7 @@ test("command: migrate dry-runs the stale stores, and --apply upgrades them", as
     const staleDb = join(env.lcmDir, `${hashPath(otherPath)}.db`);
     const stale = makeStoreWithMessage(staleDb, "o1", "history from an older build");
     stale.close();
-    const raw = new DatabaseSync(staleDb);
+    const raw = new Database(staleDb);
     raw.exec("PRAGMA user_version = 0");
     raw.close();
 
@@ -205,9 +205,9 @@ test("command: migrate dry-runs the stale stores, and --apply upgrades them", as
       ),
       `dry run names the candidate: ${notifications.join(" | ")}`,
     );
-    const stillStale = new DatabaseSync(staleDb);
+    const stillStale = new Database(staleDb);
     assert.equal(
-      (stillStale.prepare("PRAGMA user_version").get() as { user_version: number }).user_version,
+      (stillStale.query("PRAGMA user_version").get() as { user_version: number }).user_version,
       0,
       "a dry run writes nothing",
     );

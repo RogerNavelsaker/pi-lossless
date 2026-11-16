@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -343,4 +343,15 @@ test("diagnose: the host version is Pi's, and a wrong anchor says so", () => {
   assert.equal(piHostLabel(), `pi ${hostVersion(HOST_PACKAGE, import.meta.url)}`);
   const dir = mkdtempSync(join(tmpdir(), "lcm-diagnose-version-"));
   assert.equal(packageVersionNear(join(dir, "nested", "file.js"), "pi-lossless"), undefined);
+});
+
+test("diagnose: the host version resolves from a nested module without node:module", () => {
+  const dir = mkdtempSync(join(tmpdir(), "lcm-diagnose-host-package-"));
+  const packageDir = join(dir, "node_modules", ...HOST_PACKAGE.split("/"));
+  mkdirSync(packageDir, { recursive: true });
+  writeFileSync(
+    join(packageDir, "package.json"),
+    JSON.stringify({ name: HOST_PACKAGE, version: "9.8.7" }),
+  );
+  assert.equal(hostVersion(HOST_PACKAGE, join(dir, "app", "entry.js")), "9.8.7");
 });

@@ -9,7 +9,7 @@ const CORE_DIR = fileURLToPath(new URL("../src", import.meta.url));
 const HOST_SDK = "@earendil-works/";
 /** The bare specifiers a core module may name: the runtime, and the schema
  * library a reader tool declares its parameters with. */
-const ALLOWED_PREFIXES = ["node:", "typebox"];
+const ALLOWED_PREFIXES = ["node:", "bun:", "typebox"];
 
 /**
  * The specifiers one source file imports, in the forms this repo writes:
@@ -108,6 +108,7 @@ test("boundary: the rule rejects each thing it exists to catch", () => {
   assert.deepEqual(violations(here, 'import { piReader } from "../host/pi.ts";\n'), [
     `${here} imports outside the core: ../host/pi.ts`,
   ]);
+  assert.deepEqual(violations(here, 'import { Database } from "bun:sqlite";\n'), []);
   assert.deepEqual(violations(here, 'import { z } from "zod";\n'), [
     `${here} names a bare specifier the core may not use: zod`,
   ]);

@@ -1,3 +1,4 @@
+import { Database } from "bun:sqlite";
 import assert from "node:assert/strict";
 import { spawn, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
@@ -13,7 +14,6 @@ import {
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { DatabaseSync } from "node:sqlite";
 import { fileURLToPath } from "node:url";
 
 import { ingestEntries, LcmStore } from "lossless-core";
@@ -201,6 +201,7 @@ beforeAll(() => {
   }
 }, 120_000);
 
+// Run Pi on Node with a test-only bun:sqlite adapter. The Bun SQLite smoke test covers the production runtime.
 async function runPi(opts: {
   home: string;
   port: number;
@@ -209,6 +210,9 @@ async function runPi(opts: {
   env: Record<string, string>;
 }): Promise<{ code: number | null; stdout: string; stderr: string }> {
   const args = [
+    "--experimental-sqlite",
+    "--import",
+    join(REPO, "packages", "core", "test", "support", "bun-sqlite-node-loader.mjs"),
     PI_BIN,
     "--no-extensions",
     "-e",
@@ -231,7 +235,7 @@ async function runPi(opts: {
     opts.prompt,
   ];
   return new Promise((resolve) => {
-    const child = spawn(process.execPath, args, {
+    const child = spawn("node", args, {
       cwd: REPO,
       // stdin is closed on purpose: an inherited tty leaves Pi waiting for input
       // in print mode instead of finishing the prompt.
@@ -313,8 +317,8 @@ test("e2e: a swap reaches the provider wire, and a recall tool reads the store",
         .map((b, i) => `${i}: ${JSON.stringify(b.body).slice(0, 300)}`)
         .join("\n")}\n--- store ---\n${storePath}`;
 
-    const store = new DatabaseSync(storePath);
-    const messages = store.prepare("SELECT COUNT(*) c FROM messages").get() as { c: number };
+    const store = new Database(storePath);
+    const messages = store.query("SELECT COUNT(*) c FROM messages").get() as { c: number };
     assert.ok(messages.c >= 3, `messages were ingested${diagnostics()}`);
     store.close();
 
@@ -331,13 +335,13 @@ test("e2e: a swap reaches the provider wire, and a recall tool reads the store",
       mock.bodies.some((b) => JSON.stringify(b.body).includes("<conversation_chunk>")),
       `a summarizer call reached the provider${diagnostics()}`,
     );
-    const db = new DatabaseSync(storePath);
-    const leaves = db.prepare("SELECT COUNT(*) c FROM summaries WHERE kind='leaf'").get() as {
+    const db = new Database(storePath);
+    const leaves = db.query("SELECT COUNT(*) c FROM summaries WHERE kind='leaf'").get() as {
       c: number;
     };
     assert.ok(leaves.c >= 1, `a leaf summary exists${diagnostics()}`);
     const leaf = db
-      .prepare("SELECT id FROM summaries WHERE kind='leaf' ORDER BY id LIMIT 1")
+      .query("SELECT id FROM summaries WHERE kind='leaf' ORDER BY id LIMIT 1")
       .get() as { id: number } | undefined;
     db.close();
 
@@ -434,6 +438,11 @@ test("e2e: a fresh session finds a past session's decision through the cross-ses
     });
     assert.equal(run.code, 0, `${run.stdout}\n${run.stderr}`);
     const wire = mock.bodies.map((b) => JSON.stringify(b.body)).join("\n");
+    const toolResults = mock.bodies.flatMap(({ body }) =>
+      ((body["messages"] ?? []) as Array<Record<string, unknown>>)
+        .filter((message) => message["role"] === "tool")
+        .map((message) => message["content"]),
+    );
     assert.ok(
       wire.includes(`[lcm:session ${pastHash} `),
       `the cross-session pointer reached the loop${wire.slice(0, 400)}`,
@@ -443,7 +452,7 @@ test("e2e: a fresh session finds a past session's decision through the cross-ses
     assert.ok(
       wire.includes(`<recovered_findings session=\\"${pastHash}\\"`) ||
         wire.includes(`<recovered_findings session="${pastHash}"`),
-      `the findings were labelled as a past session's${wire.slice(-4000)}`,
+      `the findings were labelled as a past session's ${JSON.stringify(toolResults)}`,
     );
 
     for (const [index, recorded] of mock.bodies.entries()) {
@@ -466,8 +475,8 @@ test("e2e: a fresh session finds a past session's decision through the cross-ses
         );
       }
     }
-    const pastAfter = new DatabaseSync(join(home, ".pi", "agent", "lcm", `${pastHash}.db`));
-    const rows = pastAfter.prepare("SELECT COUNT(*) c FROM messages").get() as { c: number };
+    const pastAfter = new Database(join(home, ".pi", "agent", "lcm", `${pastHash}.db`));
+    const rows = pastAfter.query("SELECT COUNT(*) c FROM messages").get() as { c: number };
     pastAfter.close();
     assert.equal(rows.c, 1, "the past store still holds exactly its own one message");
     assert.deepEqual(

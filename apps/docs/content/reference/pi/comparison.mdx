@@ -44,7 +44,7 @@ Legend: ✅ full · 🟡 partial · ❌ none.
 | Summary quality control            | ✅ 3-level escalation with strict token-reduction acceptance; level 3 is a stored, tagged deterministic truncate; one make-smaller retry             | ✅ deterministic extraction by rule, no model call; an empty summary delegates to Pi's own summarizer                                        | ✅ LLM summaries validated against the source; a failed pass returns nothing and lets Pi compact                                       | ✅ a score-threshold gate over the generated summary, cost and yield budgets, and a true zero-LLM path                   | 🟡 2 attempts plus batch shrink; no escalation ladder                                                                                                 |
 | Safety controls                    | ✅ ingest-time injection guard and XML fencing; redaction at every seam that hands stored text to a model, the store stays verbatim                  | ❌ no injection fencing and no secret redaction (ANSI and control chars only)                                                                | ✅ `[DS4 HISTORICAL EVIDENCE]` fencing; redaction only for remote destinations, and off by default                                     | ✅ labelled untrusted evidence with tag stripping; thirteen secret patterns plus optional PII, on by default             | 🟡 prompt-level instruction to treat the transcript as untrusted evidence, no scanner; secret handling absent                                         |
 | Token budgeting and thresholds     | ✅ three vocabularies (ratios, absolute tokens, smartZone), per-model zones, safety clamp, budgets converted with a calibrated chars-per-token ratio | per-model piecewise curve over the window; immutable append segments spliced around untouched messages; no prompt-cache control              | per-model awareness config; cache-aware tail widening is opt-in and off by default, and the summarizer requests `cacheRetention: none` | minimum tokens measured against the model window; extraction cache keyed by prefix fingerprints; no prompt-cache control | 🟡 `summaryMaxTokens` 512 to 65,536 (default 4,096) clamped to 80% of Pi's reserve                                                                    |
-| Runtime dependencies               | ✅ none shipped; `node:sqlite`, Node `>=22.19`; the inlined engine declares one npm dependency, `typebox`, which Pi supplies                         | none; model calls through pi-ai `streamSimple`; clipboard and `git` binaries                                                                 | none; `node:sqlite`; `git` binary                                                                                                      | none; `bun:sqlite` or `node:sqlite`; `git` binary                                                                        | ❌ a spawned native Rust binary per operation, plus first-use GGUF model download                                                                     |
+| Runtime dependencies               | ✅ Bun `>=1.3.13`; `bun:sqlite`; the inlined engine declares one external dependency, `typebox`, which Pi supplies                         | none; model calls through pi-ai `streamSimple`; clipboard and `git` binaries                                                                 | none; `node:sqlite`; `git` binary                                                                                                      | none; `bun:sqlite` or `node:sqlite`; `git` binary                                                                        | ❌ a spawned native Rust binary per operation, plus first-use GGUF model download                                                                     |
 | Operator surface                   | Cockpit, live gauge, cycle editing, backup / doctor / reset                                                                                          | `/blackhole` settings and cleanup, `/blackhole-memory`, `/blackhole-recall`, `/blackhole-export`; no doctor, and backup is a stale-file copy | `/context` with 27 subcommands, a status line, and a storage CLI with `inspect`, `compact` and `recover`                               | `/smart-compact` with `metrics`, `dashboard`, `restore`, `loops` and `settings`, an HTML report, and a damage monitor    | settings, search and sessions panels; 7 commands; no doctor or backup                                                                                 |
 
 ## Where each one leads
@@ -86,7 +86,7 @@ its source, that this package does not have.
 | Deterministic validation repair before falling back | ds4-context-engine's bullet pruning | Dropping the one invented figure is cheaper than discarding a whole summary |
 
 The forward work with paper citations and evidence gates is in
-[the roadmap](https://github.com/stainless-code/lossless/blob/main/docs/roadmap.md#open-work).
+[the roadmap](https://github.com/RogerNavelsaker/pi-lossless/blob/main/docs/roadmap.md#open-work).
 
 ## By design, not missing
 
@@ -95,7 +95,7 @@ Gaps against this field, each with the reason it stays that way:
 - **No semantic or vector recall.** The store is FTS5 plus exact addressing.
   Peers with embeddings answer "something like this" queries we cannot. A
   verbatim address plus ranked full-text search covers the recovery case, and a
-  vector index would add an embedding dependency to an engine whose only npm
+  vector index would add an embedding dependency to an engine whose only external
   dependency is `typebox`.
 - **No curated memory tier.** There is no `MEMORY.md` the user edits, no forget
   and restore primitive over stored memory, and no per-project memory identity.
@@ -117,13 +117,13 @@ Gaps against this field, each with the reason it stays that way:
 
 Where this package departs from the paper, each deviation with its reason, is
 in
-[the roadmap](https://github.com/stainless-code/lossless/blob/main/docs/roadmap.md#paper-conformance).
+[the roadmap](https://github.com/RogerNavelsaker/pi-lossless/blob/main/docs/roadmap.md#paper-conformance).
 
 ## When to pick which
 
 | You want                                                                                       | Reach for                           |
 | ---------------------------------------------------------------------------------------------- | ----------------------------------- |
-| Searchable, verbatim-recoverable history with provenance from summary to source, on current Pi | **pi-lossless** (`npm:pi-lossless`) |
+| Searchable, verbatim-recoverable history with provenance from summary to source, on current Pi | **pi-lossless** (`git:github.com/RogerNavelsaker/pi-lossless`) |
 | Facts and preferences that outlive the session, in files you can read and edit                 | pi-memory, pi-hermes-memory         |
 | Semantic recall across sessions and machines, accepting an LLM or a hosted service             | @amaster.ai/pi-memory-mem0          |
 | Search over old sessions plus offline local summarization, and you accept a native binary      | pi-goosedump                        |
@@ -163,10 +163,8 @@ Method and coverage:
 - Versions, publish dates and dependency facts come from npm registry
   metadata; where the repo and the published package disagree, the note says
   so.
-- This package's own rows are measured from this repository. The engine's
-  manifest declares one npm dependency, `typebox`; the adapter inlines the
-  engine into its bundle and leaves only its peers external
-  (`@earendil-works/pi-ai`, `@earendil-works/pi-coding-agent`,
-  `@earendil-works/pi-tui` and `typebox`), so the published adapter's runtime
-  dependency list stays empty.
+- This package's own rows are measured from this repository. The core manifest
+  declares `typebox` as its only dependency. The Pi adapter inlines the engine
+  and leaves its declared Pi host peers external; `bun:sqlite` comes from Bun
+  itself. GitHub is the only distribution channel.
 - This field moves fast. Re-verify a cell before relying on it.

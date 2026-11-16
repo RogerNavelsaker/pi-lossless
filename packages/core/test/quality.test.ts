@@ -1,8 +1,8 @@
+import { Database } from "bun:sqlite";
 import assert from "node:assert/strict";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { DatabaseSync } from "node:sqlite";
 
 import { test } from "vite-plus/test";
 
@@ -59,7 +59,7 @@ test("quality: a v1 store refuses a read-only open, then migrates and backfills 
   const dir = mkdtempSync(join(tmpdir(), "lcm-quality-migrate-"));
   const path = join(dir, "store.db");
   try {
-    const old = new DatabaseSync(path);
+    const old = new Database(path);
     old.exec(`
       CREATE TABLE messages (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

@@ -1,8 +1,8 @@
+import { Database } from "bun:sqlite";
 import assert from "node:assert/strict";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { DatabaseSync } from "node:sqlite";
 
 import { test } from "vite-plus/test";
 
@@ -15,7 +15,7 @@ interface Fixture {
   path: string;
   store: LcmStore;
   /** A second connection, for the corruptions a healthy store makes impossible. */
-  raw: () => DatabaseSync;
+  raw: () => Database;
 }
 
 function fixture(): Fixture {
@@ -35,7 +35,7 @@ function fixture(): Fixture {
     lastEntryId: "e1",
     messageIds: store.messagesInSpan("e0", "e1").map((m) => m.id),
   });
-  return { path, store, raw: () => new DatabaseSync(path) };
+  return { path, store, raw: () => new Database(path) };
 }
 
 const kindsOf = (findings: Array<{ kind: FindingKind }>): FindingKind[] =>
@@ -217,10 +217,8 @@ test("integrity: a drifted index is not reported, and a rebuild is what removes 
   const f = fixture();
   const raw = f.raw();
   raw.exec("INSERT INTO messages_fts(rowid, text, entry_id) VALUES (99, 'ghosttoken', 'ghost')");
-  const matches = (db: DatabaseSync) =>
-    db
-      .prepare("SELECT COUNT(*) c FROM messages_fts WHERE messages_fts MATCH 'ghosttoken'")
-      .get() as {
+  const matches = (db: Database) =>
+    db.query("SELECT COUNT(*) c FROM messages_fts WHERE messages_fts MATCH 'ghosttoken'").get() as {
       c: number;
     };
   assert.equal(matches(raw).c, 1, "the index holds the orphan row");

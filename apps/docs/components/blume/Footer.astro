@@ -16,7 +16,7 @@ const { site, navigation, ui } = Astro.props;
 
 // PageLayout omits `logo`; read it from blume:data to match the header mark.
 const logo = data.config.logo;
-const repoUrl = navigation.repoUrl ?? "https://github.com/stainless-code/lossless";
+const repoUrl = navigation.repoUrl ?? "https://github.com/RogerNavelsaker/pi-lossless";
 const year = new Date().getFullYear();
 
 // Merge over the English defaults so a label missing from a translation still
@@ -41,9 +41,9 @@ const groups: {
 	{
 		label: "Packages",
 		links: [
-			{ href: "https://npmx.dev/package/lossless-core", label: "lossless-core", external: true },
-			{ href: "https://npmx.dev/package/pi-lossless", label: "pi-lossless", external: true },
-			{ href: "https://npmx.dev/package/opencode-lossless", label: "opencode-lossless", external: true },
+			{ href: "https://github.com/RogerNavelsaker/pi-lossless/tree/main/packages/core", label: "lossless-core", external: true },
+			{ href: "https://github.com/RogerNavelsaker/pi-lossless/tree/main/packages/pi", label: "pi-lossless", external: true },
+			{ href: "https://github.com/RogerNavelsaker/pi-lossless/tree/main/packages/opencode", label: "opencode-lossless", external: true },
 		],
 	},
 	{
@@ -105,11 +105,11 @@ const groups: {
         Built and maintained by{" "}
         <a
           class="transition-colors hover:text-foreground"
-          href="https://github.com/stainless-code"
+          href="https://github.com/RogerNavelsaker"
           rel="noreferrer"
           target="_blank"
         >
-          stainless-code
+          RogerNavelsaker
         </a>
       </p>
     </div>

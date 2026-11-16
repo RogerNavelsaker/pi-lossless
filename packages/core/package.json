@@ -1,6 +1,7 @@
 {
   "name": "lossless-core",
   "version": "0.1.3",
+  "private": true,
   "description": "The Lossless Context Management engine: stores every message verbatim, swaps aged context for searchable pointers, and takes a host for the model calls it cannot make itself.",
   "keywords": [
     "compaction",
@@ -11,13 +12,13 @@
     "retrieval",
     "tanstack-intent"
   ],
-  "homepage": "https://github.com/stainless-code/lossless#readme",
-  "bugs": "https://github.com/stainless-code/lossless/issues",
+  "homepage": "https://github.com/RogerNavelsaker/pi-lossless#readme",
+  "bugs": "https://github.com/RogerNavelsaker/pi-lossless/issues",
   "license": "MIT",
   "author": "stainless-code",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/stainless-code/lossless.git",
+    "url": "git+https://github.com/RogerNavelsaker/pi-lossless.git",
     "directory": "packages/core"
   },
   "files": [
@@ -36,13 +37,12 @@
   },
   "scripts": {
     "pack:watch": "vp pack --watch",
-    "prepack": "vp pack",
-    "prepublishOnly": "vp check && vp test && intent validate"
+    "prepack": "vp pack"
   },
   "dependencies": {
     "typebox": ">=1.4.3 <2"
   },
   "engines": {
-    "node": ">=22.19.0"
+    "bun": ">=1.3.13"
   }
 }

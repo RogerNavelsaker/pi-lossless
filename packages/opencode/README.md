@@ -5,7 +5,7 @@
 Install it, and the adapter mirrors every prompt, assistant reply, and tool exchange into a per-session SQLite sidecar. The model reads that history back through `lcm_grep`, `lcm_describe`, and `lcm_expand`. With `assembly` true (the default) it also gets `lcm_expand_query`, which answers through a child session without pulling the originals into the parent. With assembly on, the adapter also owns the context boundary. Past the swap point the DAG projection replaces the aged history, and when the host compacts, the adapter hands it the frontier as the checkpoint instead of letting it summarize.
 
 This package is the OpenCode v2 adapter over
-[`lossless-core`](https://npmx.dev/package/lossless-core), the engine that
+[`lossless-core`](https://github.com/RogerNavelsaker/pi-lossless/tree/main/packages/core), the engine that
 ingests the history and builds the summaries. Verified against OpenCode v2 in
 live sessions. The plugin loads from its directory, all mirrored text matches
 verbatim, and host compactions store the DAG frontier as their checkpoint.

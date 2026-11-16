@@ -258,16 +258,13 @@ Each of these was verified in peer source and is worth doing only with a reason.
 ## Names
 
 **All three packages are unscoped.** `pi-lossless` is the Pi adapter,
-`opencode-lossless` is the OpenCode v2 adapter, and `lossless-core`
-is the engine. A `@stainless-code/` scope arrives only on a real collision, and
-then it arrives once, for every package at the same time. `pi-lossless` 0.1.0 and `lossless-core` 0.1.0 are
-published; `opencode-lossless` is pending its first release. The unscoped `lossless` on npm is an unrelated published
-package, which is what the harness prefix is for; and the docs app is already
-scoped and private (`@stainless-code/lossless-docs`), so scoping stays a
-decision available rather than one made by accident. What would force the scope
-is a squat on any of the four names, or a cost that
-the engine's adjacency to the unrelated `lossless` package inflicts on a consumer
-of the published engine.
+`opencode-lossless` is the OpenCode v2 adapter, and `lossless-core` is the engine.
+This fork is distributed only through
+[`RogerNavelsaker/pi-lossless`](https://github.com/RogerNavelsaker/pi-lossless):
+install the Pi extension with `pi install git:github.com/RogerNavelsaker/pi-lossless`.
+The core and OpenCode packages are private, and no package is published to npm.
+The docs app remains scoped and private (`@stainless-code/lossless-docs`). If npm
+distribution is ever reconsidered, package-name scope can be revisited then.
 
 **The core names no host SDK.** The port is `packages/core/src/host.ts`,
 `packages/pi/**` is the only Pi-aware code, `packages/opencode/**` is the
@@ -279,7 +276,7 @@ API subset against the real host types.
 
 ## Rejected / already-superseded
 
-- **better-sqlite3**: we stay on `node:sqlite` (zero native dependencies).
+- **better-sqlite3**: Bun's built-in `bun:sqlite` needs no added native dependency.
 - **Per-message ingestion hooks** (`message_end`): the idempotent `turn_end`
   batch plus the `session_start` backfill covers the same ground with fewer hook
   invocations.

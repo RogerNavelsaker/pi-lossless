@@ -8,7 +8,7 @@ This repository holds the engine and the adapters that consume it:
 
 | Package                                            | Directory           | What it is                                                                                                   |
 | -------------------------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------ |
-| [`pi-lossless`](packages/pi/README.md)             | `packages/pi`       | The Pi extension (`pi install npm:pi-lossless`): recall tools, cockpit, commands.                            |
+| [`pi-lossless`](packages/pi/README.md)             | `packages/pi`       | The Pi extension (`pi install git:github.com/RogerNavelsaker/pi-lossless`): recall tools, cockpit, commands. |
 | [`opencode-lossless`](packages/opencode/README.md) | `packages/opencode` | The OpenCode v2 plugin: recall tools, lifecycle commands, DAG projection, per-session sidecar.               |
 | [`lossless-core`](packages/core/README.md)         | `packages/core`     | The engine: ingest, compaction, and retrieval behind a two-port host contract, with no agent SDK dependency. |
 
