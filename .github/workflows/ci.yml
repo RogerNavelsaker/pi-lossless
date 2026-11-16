@@ -120,6 +120,8 @@ jobs:
 
       - name: Validate docs links
         run: vp run --filter ./apps/docs validate --strict
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
       - name: Typecheck the docs app
         run: vp run --filter ./apps/docs check --isolated
