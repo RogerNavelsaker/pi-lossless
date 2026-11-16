@@ -1,6 +1,7 @@
 {
   "name": "pi-lossless",
   "version": "0.1.3",
+  "private": true,
   "description": "Lossless Context Management for the Pi coding agent: long sessions keep working past the point where the model would forget, and every verbatim message stays searchable and readable (lcm_grep / lcm_describe / lcm_expand_query).",
   "keywords": [
     "coding-agent",
@@ -11,13 +12,13 @@
     "pi-package",
     "tanstack-intent"
   ],
-  "homepage": "https://github.com/stainless-code/lossless#readme",
-  "bugs": "https://github.com/stainless-code/lossless/issues",
+  "homepage": "https://github.com/RogerNavelsaker/pi-lossless#readme",
+  "bugs": "https://github.com/RogerNavelsaker/pi-lossless/issues",
   "license": "MIT",
   "author": "stainless-code",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/stainless-code/lossless.git",
+    "url": "git+https://github.com/RogerNavelsaker/pi-lossless.git",
     "directory": "packages/pi"
   },
   "files": [
@@ -35,8 +36,7 @@
   },
   "scripts": {
     "pack:watch": "vp pack --watch",
-    "prepack": "vp pack",
-    "prepublishOnly": "vp check && vp test && intent validate"
+    "prepack": "vp pack"
   },
   "devDependencies": {
     "@earendil-works/pi-agent-core": "1.4.0",
@@ -53,7 +53,7 @@
     "typebox": "*"
   },
   "engines": {
-    "node": ">=22.19.0"
+    "bun": ">=1.3.13"
   },
   "pi": {
     "extensions": [

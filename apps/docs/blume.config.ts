@@ -62,8 +62,8 @@ export default defineConfig({
   logo: { image: "/logo.svg", text: title },
 
   github: {
-    owner: "stainless-code",
-    repo: "lossless",
+    owner: "RogerNavelsaker",
+    repo: "pi-lossless",
     branch: "main",
     dir: "apps/docs",
   },
@@ -74,8 +74,8 @@ export default defineConfig({
     sources: [
       filesystem({ root: "content" }),
       githubReleases({
-        owner: "stainless-code",
-        repo: "lossless",
+        owner: "RogerNavelsaker",
+        repo: "pi-lossless",
         prefix: "changelog",
       }),
     ],
@@ -104,10 +104,10 @@ export default defineConfig({
       { label: "Comparison", href: "/reference/pi/comparison" },
       { label: "Roadmap", href: "/roadmap" },
       { label: "Changelog", href: "/changelog" },
-      { label: "npm", href: "https://npmx.dev/package/pi-lossless" },
+      { label: "GitHub", href: "https://github.com/RogerNavelsaker/pi-lossless" },
       {
         label: "MIT license",
-        href: "https://github.com/stainless-code/lossless/blob/main/LICENSE",
+        href: "https://github.com/RogerNavelsaker/pi-lossless/blob/main/LICENSE",
       },
     ],
     socials: {

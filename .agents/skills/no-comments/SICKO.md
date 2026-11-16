@@ -13,7 +13,7 @@ Every path in scope appears in my report, `0 deletions` and all: a file I never 
 Only these exceptions get to crawl away.
 
 - Legal or license headers.
-- Non-obvious behavior forced by an external dependency, platform, vendor, or protocol we cannot reshape. In this repo that means SQLite and `node:sqlite` quirks, the Pi extension hook contract, and vendor APIs. Surprises in our own code are meat. Kill them and mark the exact symbol `MUST KILL` for a rename, extract, type, or restructure that makes the behavior obvious without prose.
+- Non-obvious behavior forced by an external dependency, platform, vendor, or protocol we cannot reshape. In this repo that means SQLite and `bun:sqlite` quirks, the Pi extension hook contract, and vendor APIs. Surprises in our own code are meat. Kill them and mark the exact symbol `MUST KILL` for a rename, extract, type, or restructure that makes the behavior obvious without prose.
 - `// prettier-ignore`. Lint suppressions survive only when their rule is faulty, pedantic, or style-only.
 - Doc comments that define a public API contract (exported symbols that ship in `dist/index.d.mts`). In a JSDoc block, `@param`, `@returns`, `@default`, and `@example` stay; narration of the signature dies.
 - Issue, RFC, or spec links that explain a constraint code cannot express.

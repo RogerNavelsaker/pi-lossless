@@ -1,0 +1,36 @@
+name: Version packages
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  version:
+    name: Open or update the Version PR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+
+      - name: Setup Bun and install
+        uses: ./.github/actions/setup
+
+      - name: Create Version PR
+        uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
+        with:
+          version-script: bun run version
+          publish-script: echo "Registry publishing is disabled; GitHub releases are built by release.yml."
+          commit-message: "chore: version packages"
+          pr-title: "chore: version packages"
+          create-github-releases: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

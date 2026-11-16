@@ -16,6 +16,7 @@
     "lint:ci": "vp lint --quiet",
     "test": "vp test",
     "test:coverage": "vp test --coverage --coverage.reporter=lcov",
+    "test:bun-sqlite": "bun scripts/test-bun-sqlite.ts",
     "coverage:codemap": "codemap ingest-coverage coverage/lcov.info && node -e \"fs.rmSync('coverage',{recursive:true,force:true})\"",
     "opencode:check": "bun scripts/opencode-live.ts",
     "opencode:smoke": "bun scripts/opencode-smoke.ts",
@@ -23,19 +24,25 @@
     "pack": "vp run --filter ./packages/core prepack && vp run --filter ./packages/pi prepack && vp run --filter ./packages/opencode prepack",
     "changeset": "changeset",
     "version": "changeset version && bun install && bun scripts/sync-skill-versions.ts && vp fmt packages/*/CHANGELOG.md",
-    "release": "changeset publish",
     "prepare": "vp config || true",
     "eval": "bun scripts/eval-long-context.ts"
   },
   "devDependencies": {
     "@changesets/cli": "^3.0.3",
     "@tanstack/intent": "0.5.6",
+    "@types/bun": "1.3.13",
     "@types/node": "^26.6.5",
     "@vitest/coverage-v8": "catalog:",
     "typescript": "^7.0.2",
     "vite": "catalog:",
     "vite-plus": "catalog:",
     "vitest": "catalog:"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-ai": "*",
+    "@earendil-works/pi-coding-agent": "*",
+    "@earendil-works/pi-tui": "*",
+    "typebox": "*"
   },
   "overrides": {
     "@earendil-works/pi-coding-agent": {
@@ -48,7 +55,7 @@
     "vitest": "catalog:"
   },
   "engines": {
-    "node": ">=22.19.0"
+    "bun": ">=1.3.13"
   },
   "packageManager": "bun@1.4.4",
   "catalog": {
@@ -56,5 +63,10 @@
     "vite": "npm:@voidzero-dev/vite-plus-core@1.5.0",
     "vitest": "5.1.0",
     "vite-plus": "1.5.0"
+  },
+  "pi": {
+    "extensions": [
+      "./packages/pi/dist/index.mjs"
+    ]
   }
 }

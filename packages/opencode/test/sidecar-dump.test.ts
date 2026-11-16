@@ -1,3 +1,4 @@
+import { Database } from "bun:sqlite";
 import {
   chmodSync,
   existsSync,
@@ -10,7 +11,6 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { DatabaseSync } from "node:sqlite";
 
 import { ingestEntries, LcmStore, redactSecrets } from "lossless-core";
 import { describe, expect, it } from "vite-plus/test";
@@ -99,7 +99,7 @@ describe("sidecar dump", () => {
     try {
       const path = join(dir, "old.sqlite");
       seedStore(path);
-      const raw = new DatabaseSync(path);
+      const raw = new Database(path);
       try {
         raw.exec("PRAGMA user_version = 1");
       } finally {

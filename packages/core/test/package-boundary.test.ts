@@ -69,9 +69,9 @@ test("package: the engine depends on its schema library and nothing else", () =>
   assert.ok(!(manifest.keywords ?? []).includes("pi-package"));
 });
 
-test("package: the engine is publishable, and ships dist plus the docs it owns", () => {
+test("package: the engine is GitHub-only, and ships dist plus the docs it owns", () => {
   assert.equal(manifest.name, "lossless-core");
-  assert.equal(manifest.private, undefined);
+  assert.equal(manifest.private, true);
   assert.deepEqual(manifest.files, ["dist", "CHANGELOG.md", "skills"]);
   for (const name of ["README.md", "LICENSE", "CHANGELOG.md"]) {
     assert.ok(existsSync(join(PACKAGE_DIR, name)), `${name} is not in the package`);

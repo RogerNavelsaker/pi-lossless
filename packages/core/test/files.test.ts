@@ -1,8 +1,8 @@
+import { Database } from "bun:sqlite";
 import assert from "node:assert/strict";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { DatabaseSync } from "node:sqlite";
 
 import { test } from "vite-plus/test";
 
@@ -325,9 +325,9 @@ test("store: a file row whose kind this build cannot read comes back as text", (
   const dir = mkdtempSync(join(tmpdir(), "lcm-filekind-"));
   const store = new LcmStore(join(dir, "store.db"));
   try {
-    const raw = new DatabaseSync(join(dir, "store.db"));
+    const raw = new Database(join(dir, "store.db"));
     raw
-      .prepare(
+      .query(
         "INSERT INTO files (file_id, path, bytes, sha256, kind, preview, first_entry_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
       )
       .run("0123456789abcdef", "/x/a.yaml", 10, "a".repeat(64), "yaml", "1 element(s)", "e0", 0);

@@ -10,14 +10,14 @@ verbatim history stays searchable and recoverable through `lcm_grep` /
 `lcm_describe` / `lcm_expand_query`. Your session file is never modified, and the
 store is a derived index you can delete and rebuild.
 
-This package is the Pi adapter over
-[`lossless-core`](https://npmx.dev/package/lossless-core), the engine that
-ingests the history and builds the summaries.
+This package is the Pi adapter over `lossless-core`, the engine that
+ingests the history and builds the summaries. The GitHub installation requires
+Bun 1.3.13 or later.
 
 ## Install
 
 ```bash
-pi install npm:pi-lossless
+pi install git:github.com/RogerNavelsaker/pi-lossless
 ```
 
 ## Quick start

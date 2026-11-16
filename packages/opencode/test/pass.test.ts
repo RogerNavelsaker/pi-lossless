@@ -1,7 +1,7 @@
+import { Database } from "bun:sqlite";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { DatabaseSync } from "node:sqlite";
 
 import { ingestEntries, LcmStore, metricsPath, type AlignedEntry } from "lossless-core";
 import { describe, expect, it } from "vite-plus/test";
@@ -61,9 +61,9 @@ function tempDir(): string {
 }
 
 function countRows(path: string, where: string): number {
-  const db = new DatabaseSync(path);
+  const db = new Database(path);
   try {
-    const row = db.prepare(`SELECT COUNT(*) AS c FROM summaries WHERE ${where}`).get() as {
+    const row = db.query(`SELECT COUNT(*) AS c FROM summaries WHERE ${where}`).get() as {
       c: number;
     };
     return Number(row.c);

@@ -1,7 +1,7 @@
+import { Database } from "bun:sqlite";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { DatabaseSync } from "node:sqlite";
 
 import { LcmStore, cutIndexFor, ingestEntries, normalizeRole } from "lossless-core";
 import { describe, expect, it } from "vite-plus/test";
@@ -77,10 +77,10 @@ function keepFor(wanted: number): number {
 }
 
 function committedSummaries(path: string): number {
-  const db = new DatabaseSync(path);
+  const db = new Database(path);
   try {
     const row = db
-      .prepare("SELECT COUNT(*) AS count FROM summaries WHERE status = 'committed'")
+      .query("SELECT COUNT(*) AS count FROM summaries WHERE status = 'committed'")
       .get() as { count: number };
     return Number(row.count);
   } finally {

@@ -1,8 +1,8 @@
+import { Database } from "bun:sqlite";
 import assert from "node:assert/strict";
 import { mkdtempSync, readFileSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { DatabaseSync } from "node:sqlite";
 
 import { test } from "vite-plus/test";
 
@@ -182,9 +182,9 @@ test("store: coveredMessageIds walks past the DAG depth cap and survives a cycle
       }).id;
     }
     assert.deepEqual(s.coveredMessageIds(node), messageIds, "a deep chain walks to its messages");
-    const raw = new DatabaseSync(join(dir, "store.db"));
+    const raw = new Database(join(dir, "store.db"));
     raw
-      .prepare("INSERT INTO provenance (summary_id, child_type, child_id) VALUES (?, 'summary', ?)")
+      .query("INSERT INTO provenance (summary_id, child_type, child_id) VALUES (?, 'summary', ?)")
       .run(node, node);
     raw.close();
     assert.deepEqual(

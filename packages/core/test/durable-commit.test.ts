@@ -1,8 +1,8 @@
+import { Database } from "bun:sqlite";
 import assert from "node:assert/strict";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { DatabaseSync } from "node:sqlite";
 
 import { test, vi } from "vite-plus/test";
 
@@ -86,7 +86,7 @@ test("a commit drops a node whose child no longer resolves", () => {
     lastEntryId: "e1",
     childSummaryIds: [child.id],
   });
-  const raw = new DatabaseSync(f.path);
+  const raw = new Database(f.path);
   raw.exec(`DELETE FROM summaries WHERE id = ${child.id}`);
   raw.close();
 
@@ -108,8 +108,8 @@ test("a commit clears the run a row was written under", () => {
   const inserted = s.forRun(token).insertSummary(leaf());
   assert.deepEqual(s.commitRun(token), { committed: 1, dropped: 0 });
 
-  const raw = new DatabaseSync(f.path);
-  const row = raw.prepare("SELECT status, run FROM summaries WHERE id = ?").get(inserted.id) as {
+  const raw = new Database(f.path);
+  const row = raw.query("SELECT status, run FROM summaries WHERE id = ?").get(inserted.id) as {
     status: string;
     run: string | null;
   };
@@ -298,16 +298,16 @@ test("two handles in the same millisecond mint two tokens", () => {
 test("a store written before runs were recorded migrates without its pending rows", () => {
   const f = fixture();
   leaveCrashedRun(f.path, { first: "e0", last: "e1" });
-  const raw = new DatabaseSync(f.path);
+  const raw = new Database(f.path);
   raw.exec("DELETE FROM runs");
   raw.exec("PRAGMA user_version = 0");
   raw.close();
 
   const migrated = new LcmStore(f.path);
-  const rows = new DatabaseSync(f.path);
+  const rows = new Database(f.path);
   assert.equal(
     (
-      rows.prepare("SELECT COUNT(*) AS n FROM summaries WHERE status = 'pending'").get() as {
+      rows.query("SELECT COUNT(*) AS n FROM summaries WHERE status = 'pending'").get() as {
         n: number;
       }
     ).n,
@@ -320,9 +320,9 @@ test("a store written before runs were recorded migrates without its pending row
   assert.equal(migrated.openRun().dropped, 0);
   migrated.close();
   f.store.close();
-  const after = new DatabaseSync(f.path);
+  const after = new Database(f.path);
   assert.equal(
-    (after.prepare("PRAGMA user_version").get() as { user_version: number }).user_version,
+    (after.query("PRAGMA user_version").get() as { user_version: number }).user_version,
     SCHEMA_VERSION,
   );
   after.close();
@@ -332,14 +332,14 @@ test("a store written before runs were recorded migrates without its pending row
 test("a run table that predates its present shape is replaced, and its rows reaped", () => {
   const f = fixture();
   leaveCrashedRun(f.path, { first: "e0", last: "e1" });
-  const raw = new DatabaseSync(f.path);
-  const token = (raw.prepare("SELECT token FROM runs").get() as { token: string }).token;
+  const raw = new Database(f.path);
+  const token = (raw.query("SELECT token FROM runs").get() as { token: string }).token;
   raw.exec("DROP TABLE runs");
   raw.exec(
     "CREATE TABLE runs (token TEXT PRIMARY KEY, owner TEXT NOT NULL, pid INTEGER NOT NULL, session TEXT, started_at INTEGER NOT NULL)",
   );
   raw
-    .prepare("INSERT INTO runs (token, owner, pid, session, started_at) VALUES (?, ?, ?, ?, ?)")
+    .query("INSERT INTO runs (token, owner, pid, session, started_at) VALUES (?, ?, ?, ?, ?)")
     .run(token, "old-handle", process.pid, "old-session", Date.now());
   raw.close();
 
@@ -348,8 +348,8 @@ test("a run table that predates its present shape is replaced, and its rows reap
   assert.equal(migrated.stats().summaries, 0);
   migrated.close();
   f.store.close();
-  const after = new DatabaseSync(f.path);
-  const columns = after.prepare("SELECT name FROM pragma_table_info('runs')").all() as Array<{
+  const after = new Database(f.path);
+  const columns = after.query("SELECT name FROM pragma_table_info('runs')").all() as Array<{
     name: string;
   }>;
   assert.deepEqual(

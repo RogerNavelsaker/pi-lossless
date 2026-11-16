@@ -7,9 +7,9 @@ metadata:
   library: "lossless-core"
   library_version: "0.1.3"
 sources:
-  - stainless-code/lossless:packages/core/src/host.ts
-  - stainless-code/lossless:packages/core/src/index.ts
-  - stainless-code/lossless:packages/core/README.md
+  - RogerNavelsaker/pi-lossless:packages/core/src/host.ts
+  - RogerNavelsaker/pi-lossless:packages/core/src/index.ts
+  - RogerNavelsaker/pi-lossless:packages/core/README.md
 ---
 
 # Lossless core

@@ -1,8 +1,8 @@
+import { Database } from "bun:sqlite";
 import assert from "node:assert/strict";
 import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { DatabaseSync } from "node:sqlite";
 
 import { redactSecrets } from "lossless-core";
 import { ingestEntries } from "lossless-core";
@@ -303,7 +303,7 @@ test("search across sessions: an unreadable, absent or older store is skipped an
     );
     f.store(pastSession, ["the WAL probe decision"]).close();
     f.store(old, ["an old WAL probe note"]).close();
-    const stale = new DatabaseSync(sessionStorePath(f.storesDir, old));
+    const stale = new Database(sessionStorePath(f.storesDir, old));
     stale.exec("PRAGMA user_version = 0");
     stale.close();
     writeFileSync(sessionStorePath(f.storesDir, broken), "not a database at all", "utf8");
@@ -703,7 +703,7 @@ test("a store at the current generation opens read-only outside a session", () =
       assert.equal(opened.store.grep("needle").length, 1);
       opened.store.close();
     }
-    const db = new DatabaseSync(ref.storePath);
+    const db = new Database(ref.storePath);
     db.exec("PRAGMA user_version = 0");
     db.close();
     const stale = openSessionStore(ref);

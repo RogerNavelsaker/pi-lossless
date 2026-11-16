@@ -1,3 +1,4 @@
+import { Database } from "bun:sqlite";
 import assert from "node:assert/strict";
 import {
   chmodSync,
@@ -10,7 +11,6 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { DatabaseSync } from "node:sqlite";
 
 import { test } from "vite-plus/test";
 
@@ -636,19 +636,19 @@ test("store: entry counts by prefix separate adapter row families", () => {
 test("store: a legacy DB with duplicate spans opens without dropping a row", () => {
   const dir = mkdtempSync(join(tmpdir(), "lcm-migration-"));
   const dbPath = join(dir, "legacy.db");
-  const legacy = new DatabaseSync(dbPath);
+  const legacy = new Database(dbPath);
   legacy.exec(`
 		CREATE TABLE messages (id INTEGER PRIMARY KEY AUTOINCREMENT, entry_id TEXT NOT NULL UNIQUE, role TEXT NOT NULL, text TEXT NOT NULL, tokens INTEGER NOT NULL, timestamp INTEGER NOT NULL);
 		CREATE TABLE summaries (id INTEGER PRIMARY KEY AUTOINCREMENT, kind TEXT NOT NULL, text TEXT NOT NULL, tokens INTEGER NOT NULL, depth INTEGER NOT NULL, first_entry_id TEXT NOT NULL, last_entry_id TEXT NOT NULL, created_at INTEGER NOT NULL);
 		CREATE TABLE provenance (summary_id INTEGER NOT NULL REFERENCES summaries(id) ON DELETE CASCADE, child_type TEXT NOT NULL, child_id INTEGER NOT NULL, PRIMARY KEY (summary_id, child_type, child_id));
 	`);
   legacy
-    .prepare(
+    .query(
       "INSERT INTO summaries (kind, text, tokens, depth, first_entry_id, last_entry_id, created_at) VALUES ('leaf', 'old dup 1', 2, 0, 'e0', 'e3', 1)",
     )
     .run();
   legacy
-    .prepare(
+    .query(
       "INSERT INTO summaries (kind, text, tokens, depth, first_entry_id, last_entry_id, created_at) VALUES ('leaf', 'newest dup', 2, 0, 'e0', 'e3', 2)",
     )
     .run();
