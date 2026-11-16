@@ -24,7 +24,6 @@
     "pack": "vp run --filter ./packages/core prepack && vp run --filter ./packages/pi prepack && vp run --filter ./packages/opencode prepack",
     "changeset": "changeset",
     "version": "changeset version && bun install && bun scripts/sync-skill-versions.ts && vp fmt packages/*/CHANGELOG.md",
-    "prepare": "vp config || true",
     "eval": "bun scripts/eval-long-context.ts"
   },
   "devDependencies": {
