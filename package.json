@@ -1,5 +1,5 @@
 {
-  "name": "lossless-workspace",
+  "name": "pi-lossless",
   "private": true,
   "workspaces": [
     "packages/*",

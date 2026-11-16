@@ -7,7 +7,7 @@ on:
   pull_request:
     types: [closed]
     branches: [main]
-  # Async release follow-up: releases created by changesets with GITHUB_TOKEN
+  # Async release follow-up: releases created by GitHub Release workflow with GITHUB_TOKEN
   # cannot trigger `release: published` downstream (GITHUB_TOKEN events spawn
   # no new runs). workflow_run fires regardless of token, in its own run,
   # so Release stays untouched. Read from main, so this takes effect post-merge.
@@ -50,7 +50,7 @@ jobs:
 
       # Release runs on every main push; deploy only when its head shipped
       # a release (any tag present: every tag in these repos is a
-      # changesets release tag). Skips green, no red noise.
+      # package release tag). Skips green, no red noise.
       - name: Require release tag on head
         id: gate
         if: github.event_name == 'workflow_run'

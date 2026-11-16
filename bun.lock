@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "lossless-workspace",
+      "name": "pi-lossless",
       "devDependencies": {
         "@changesets/cli": "^3.0.3",
         "@tanstack/intent": "0.5.6",
