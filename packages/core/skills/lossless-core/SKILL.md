@@ -5,7 +5,7 @@ license: MIT
 metadata:
   type: core
   library: "lossless-core"
-  library_version: "0.1.3"
+  library_version: "0.1.4"
 sources:
   - RogerNavelsaker/pi-lossless:packages/core/src/host.ts
   - RogerNavelsaker/pi-lossless:packages/core/src/index.ts

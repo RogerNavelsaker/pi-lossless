@@ -5,7 +5,7 @@ license: MIT
 metadata:
   type: composition
   library: "pi-lossless"
-  library_version: "0.1.3"
+  library_version: "0.1.4"
 requires: []
 sources:
   - RogerNavelsaker/pi-lossless:packages/pi/src

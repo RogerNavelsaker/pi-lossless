@@ -1,5 +1,11 @@
 # opencode-lossless
 
+## 0.1.4
+
+### Patch Changes
+
+- 163da4e: Use Bun SQLite for the store, make GitHub the Pi installation and release path, and keep the extension compatible with Pi-Bolt AOT compilation.
+
 ## 0.1.3
 
 ### Patch Changes
